@@ -1,0 +1,33 @@
+name: Mirroring
+description: Mirroring
+author: nanake
+
+inputs:
+  source:
+    description: git source repo
+    required: true
+  target:
+    description: destination github repo name
+    required: true
+  token:
+    description: personal access token
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - run: |
+        set -xe
+
+        SOURCE=${{ inputs.source }}
+        TARGET=${{ inputs.target }}
+        TOKEN=${{ inputs.token }}
+
+        GH_REPO="https://${GITHUB_ACTOR}:${TOKEN}@github.com/${GITHUB_ACTOR}/${TARGET}.git"
+
+        git clone --mirror "$SOURCE" "$TARGET" && cd "$TARGET"
+        git remote set-url --push origin "$GH_REPO"
+        git push --mirror
+
+        cd .. && rm -rf "$TARGET"
+      shell: bash
